@@ -47,7 +47,8 @@ redirects:
     locations: {{ codes_json|safe }},
     z: {{ scores_json|safe }},
     text: {{ names_json|safe }},
-    colorscale: '{{ colorscale }}',
+    colorscale: [[0, '#1f77b4'], [0.5, '#2ca02c'], [1, '#d62728']],
+    zmin: 0, zmax: 1,
     showscale: false,
     hovertemplate: '<b>%{text}</b><br>score: %{z:.2f}<extra></extra>',
     marker: {line: {color: '#888', width: 0.4}}

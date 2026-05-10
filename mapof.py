@@ -300,23 +300,11 @@ LOCATIONMODE = {'world': 'ISO-3', 'usa': 'USA-states'}
 PROJECTION = {'world': 'natural earth', 'usa': 'albers usa'}
 MAP_NAMES = {'world': 'World', 'usa': 'U.S. states'}
 
-# Anchor color words → Plotly perceptual single-hue colorscales. For each query
-# we pick whichever anchor sits closest in word2vec space, so the map's hue
-# loosely tracks the word's flavor (warm / cool / earthy / etc.) while still
-# rendering as a proper sequential scheme.
-COLORSCALES = {
-    'red': 'Reds',
-    'blue': 'Blues',
-    'green': 'Greens',
-    'orange': 'Oranges',
-    'purple': 'Purples',
-}
 
 
 class MapOf(Project):
 
-    SCORES = {}        # map_id -> {region_key: vec}
-    COLOR_SCORES = {}  # color_name -> vec
+    SCORES = {}  # map_id -> {region_key: vec}
 
     def _load_vectors(self, keys):
         conn = _conn()
@@ -332,11 +320,6 @@ class MapOf(Project):
             regions = COUNTRIES if map_id == 'world' else STATES
             self.SCORES[map_id] = self._load_vectors(regions.keys())
         return self.SCORES[map_id]
-
-    def _color_scores(self):
-        if not self.COLOR_SCORES:
-            self.COLOR_SCORES = self._load_vectors(COLORSCALES.keys())
-        return self.COLOR_SCORES
 
     def _score_against(self, word, item_scores, key_to_output, backfill):
         """Returns {output_code: normalized_score} for the given word."""
@@ -396,17 +379,11 @@ class MapOf(Project):
             d['error'] = '"%s" could not be found. Try a different word.' % word
             return
 
-        anchor_scores = self._score_against(
-            positive, self._color_scores(), {c: c for c in COLORSCALES}, []
-        )
-        anchor = max(anchor_scores, key=anchor_scores.get) if anchor_scores else 'blue'
-
         sorted_scores = sorted(scores.items(), key=lambda t: t[1], reverse=True)
         d['data'] = sorted_scores
         d['codes_json'] = json.dumps([c for c, _ in sorted_scores])
         d['scores_json'] = json.dumps([round(float(s), 4) for _, s in sorted_scores])
         d['names_json'] = json.dumps([code_to_name.get(c, c) for c, _ in sorted_scores])
-        d['colorscale'] = COLORSCALES[anchor]
 
     def handle_request(self, handler, request):
         if handler == 'autocomplete':
