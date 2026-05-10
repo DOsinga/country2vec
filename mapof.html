@@ -30,11 +30,7 @@ redirects:
 </form>
 <p><b>{{ error }}</b></p>
 
-{% if not word %}
-  <img src="{{ static }}{{ preview }}" width="720" height="360"/>
-{% else %}
-  <div id="regions_div"></div>
-{% endif %}
+<div id="regions_div"></div>
 
 <p>
   Examples:
@@ -44,7 +40,7 @@ redirects:
 </p>
 
 <script>
-{% if word and not error %}
+{% if not error %}
   Plotly.newPlot('regions_div', [{
     type: 'choropleth',
     locationmode: '{{ locationmode }}',
