@@ -367,9 +367,21 @@ class MapOf(Project):
         for to_code, _from, name in backfill:
             code_to_name.setdefault(to_code, name)
 
-        word = request.GET.get('word', 'pasta')
-        word_processed = word.lower().replace(' ', '_')
+        word = request.GET.get('word', '').strip()
 
+        d['word'] = word
+        d['map_id'] = map_id
+        d['map_name'] = MAP_NAMES[map_id]
+        d['maps'] = list(MAP_NAMES.items())
+        d['examples'] = EXAMPLES[map_id]
+        d['preview'] = PREVIEWS[map_id]
+        d['locationmode'] = LOCATIONMODE[map_id]
+        d['projection_type'] = PROJECTION[map_id]
+
+        if not word:
+            return  # show the preview image, nothing to score
+
+        word_processed = word.lower().replace(' ', '_')
         if '-' in word_processed:
             positive, negative = word_processed.split('-', 1)
         else:
@@ -381,15 +393,6 @@ class MapOf(Project):
             neg = self._score_against(negative, region_scores, key_to_code, backfill)
             for k, v in neg.items():
                 scores[k] = scores.get(k, 0) - v
-
-        d['word'] = word
-        d['map_id'] = map_id
-        d['map_name'] = MAP_NAMES[map_id]
-        d['maps'] = list(MAP_NAMES.items())
-        d['examples'] = EXAMPLES[map_id]
-        d['preview'] = PREVIEWS[map_id]
-        d['locationmode'] = LOCATIONMODE[map_id]
-        d['projection_type'] = PROJECTION[map_id]
 
         if not scores:
             d['error'] = '"%s" could not be found. Try a different word.' % word
