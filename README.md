@@ -1,5 +1,7 @@
 # country2vec
 
+![](mapof.jpg)
+
 Color a world or US map by how semantically close a word is to each country (or
 state) name. Built on Google News Word2Vec — the names of countries (and US
 states) end up acting as a fuzzy choropleth of meaning. "vodka" lights up
