@@ -299,7 +299,7 @@ EXAMPLES = {
 PREVIEWS = {'world': 'preview.jpg', 'usa': 'US-preview.jpg'}
 LOCATIONMODE = {'world': 'ISO-3', 'usa': 'USA-states'}
 PROJECTION = {'world': 'natural earth', 'usa': 'albers usa'}
-MAP_NAMES = {'world': 'world', 'usa': 'U.S. states'}
+MAP_NAMES = {'world': 'World', 'usa': 'U.S. states'}
 
 HI = 240
 LO = 80
@@ -385,8 +385,7 @@ class MapOf(Project):
         d['word'] = word
         d['map_id'] = map_id
         d['map_name'] = MAP_NAMES[map_id]
-        d['other_map_id'] = 'usa' if map_id == 'world' else 'world'
-        d['other_map_name'] = MAP_NAMES[d['other_map_id']]
+        d['maps'] = list(MAP_NAMES.items())
         d['examples'] = EXAMPLES[map_id]
         d['preview'] = PREVIEWS[map_id]
         d['locationmode'] = LOCATIONMODE[map_id]

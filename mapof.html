@@ -18,11 +18,13 @@ redirects:
   .mapof-examples a { margin-right: 0.6em; }
 </style>
 
-<p>Try it out below:</p>
-
 <form method="get">
-  <input type="hidden" name="map" value="{{ map_id }}">
-  <label>Enter a word:
+  <label>Map:
+    <select name="map" onchange="this.form.submit()">
+      {% for mid, mname in maps %}<option value="{{ mid }}"{% if mid == map_id %} selected{% endif %}>{{ mname }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Word:
     <input name="word" value="{{ word }}" id="word"><input type="submit">
   </label>
 </form>
@@ -35,7 +37,6 @@ redirects:
 {% endif %}
 
 <p>
-  Try the <b><a href="?map={{ other_map_id }}&amp;word={{ word|urlencode }}">{{ other_map_name }} version</a></b>.
   Examples:
   <span class="mapof-examples">
     {% for ex in examples %}<a href="?map={{ map_id }}&amp;word={{ ex }}">{{ ex }}</a>{% endfor %}
