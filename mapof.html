@@ -47,7 +47,7 @@ redirects:
     locations: {{ codes_json|safe }},
     z: {{ scores_json|safe }},
     text: {{ names_json|safe }},
-    colorscale: [[0, '#{{ rgb_from }}'], [1, '#{{ rgb_to }}']],
+    colorscale: '{{ colorscale }}',
     showscale: false,
     hovertemplate: '<b>%{text}</b><br>score: %{z:.2f}<extra></extra>',
     marker: {line: {color: '#888', width: 0.4}}
@@ -89,8 +89,4 @@ $(function() {
   (3M words, 300-dim). I converted the 12&nbsp;GB binary into a sqlite-vec database that ships in this project's static
   directory: each lowercase word stores the sum of its case-variants as one float32 vector, looked up with a primary-key
   lookup on every query.
-</p>
-<p>
-  For extra cuteness, the map's hue is the strongest of red / green / blue against the chosen word —
-  <a href="?map={{ map_id }}&amp;word=wine">wine</a> does come out red.
 </p>
