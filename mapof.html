@@ -1,0 +1,99 @@
+<script type="text/markdown" id="info">
+name: Map of
+description: >
+  Color a world or US map by how semantically close a word is to each country (or state) name. Built on Google News Word2Vec — the geography of meaning ends up surprisingly readable: "vodka" lights up Eastern Europe, "malaria" the African belt.
+type: ai
+github: country2vec
+redirects:
+  - worldmapof
+  - usmapof
+</script>
+
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
+
+<style>
+  #regions_div { width: 720px; height: 420px; }
+  .mapof-examples a { margin-right: 0.6em; }
+</style>
+
+<p>Try it out below:</p>
+
+<form method="get">
+  <input type="hidden" name="map" value="{{ map_id }}">
+  <label>Enter a word:
+    <input name="word" value="{{ word }}" id="word"><input type="submit">
+  </label>
+</form>
+<p><b>{{ error }}</b></p>
+
+{% if word == 'pasta' %}
+  <img src="{{ static }}{{ preview }}" width="720" height="360"/>
+{% else %}
+  <div id="regions_div"></div>
+{% endif %}
+
+<p>
+  Try the <b><a href="?map={{ other_map_id }}&amp;word={{ word|urlencode }}">{{ other_map_name }} version</a></b>.
+  Examples:
+  <span class="mapof-examples">
+    {% for ex in examples %}<a href="?map={{ map_id }}&amp;word={{ ex }}">{{ ex }}</a>{% endfor %}
+  </span>
+</p>
+
+<script>
+{% if word != 'pasta' and not error %}
+  Plotly.newPlot('regions_div', [{
+    type: 'choropleth',
+    locationmode: '{{ locationmode }}',
+    locations: {{ codes_json|safe }},
+    z: {{ scores_json|safe }},
+    text: {{ names_json|safe }},
+    colorscale: [[0, '#{{ rgb_from }}'], [1, '#{{ rgb_to }}']],
+    showscale: false,
+    hovertemplate: '<b>%{text}</b><br>score: %{z:.2f}<extra></extra>',
+    marker: {line: {color: '#888', width: 0.4}}
+  }], {
+    geo: {
+      projection: {type: '{{ projection_type }}'},
+      showcoastlines: true, coastlinecolor: '#888',
+      showland: true, landcolor: '#eee',
+      showocean: false,
+      bgcolor: 'rgba(0,0,0,0)',
+      showframe: false,
+      showlakes: false,
+      {% if map_id == 'usa' %}scope: 'usa',{% endif %}
+    },
+    margin: {t: 0, b: 0, l: 0, r: 0},
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+  }, {responsive: true, displayModeBar: false});
+{% endif %}
+
+$(function() {
+  $("#word").autocomplete({
+    source: function(req, resp) {
+      $.ajax({url: "/projects/mapof/autocomplete", dataType: "json", data: {q: req.term}, success: resp});
+    },
+    minLength: 2
+  });
+});
+</script>
+
+<p>
+  Word2Vec associates a vector with each word by processing large amounts of text. The vectors land
+  in a semantic space where similar words sit close together, and you can do arithmetic on them
+  (the classic example: <i>king − man + woman ≈ queen</i>). Restricting the comparison set to
+  country (or US state) names turns that space into a fuzzy choropleth of meaning.
+</p>
+<p>
+  The model is <a href="https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit">Google News word2vec</a>
+  (3M words, 300-dim). I converted the 12&nbsp;GB binary into a sqlite-vec database that ships in this project's static
+  directory: each lowercase word stores the sum of its case-variants as one float32 vector, looked up with a primary-key
+  lookup on every query.
+</p>
+<p>
+  For extra cuteness, the map's hue is the strongest of red / green / blue against the chosen word —
+  <a href="?map={{ map_id }}&amp;word=wine">wine</a> does come out red.
+</p>
