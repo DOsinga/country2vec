@@ -5,10 +5,7 @@ state) name. Built on Google News Word2Vec — the names of countries (and US
 states) end up acting as a fuzzy choropleth of meaning. "vodka" lights up
 Eastern Europe, "malaria" the African belt, "cowboy" the western US.
 
-Live at [douwe.com/projects/mapof](https://douwe.com/projects/mapof). This repo
-is also the rendered project directory inside the larger
-[douweosinga/djangosite](https://github.com/DOsinga/douweosinga) site — the same
-files run both ways.
+Try it live at [douwe.com/projects/mapof](https://douwe.com/projects/mapof).
 
 ## Run
 
@@ -24,11 +21,13 @@ into a single float32 vector per lowercase word, and writes them to
 `words_lower` index is also written for autocomplete prefix lookups. About four
 minutes of work after the download finishes.
 
-The Django view (`mapof.py`) reads the DB through `apsw + sqlite-vec` and renders
-a Plotly choropleth — `natural earth` projection for the world map,
-`albers usa` for the US map. Map type is selected via `?map=world` (default) or
-`?map=usa`; adding a third map type means appending an entry to the
-`COUNTRIES`/`STATES`-style dicts in `mapof.py`.
+`mapof.py` is the scoring code: it loads the country / state name embeddings
+once, then for each query word computes cosine distance against every region
+and rescales the result per map. The output is the (region_code, score, name)
+data that gets rendered as a Plotly choropleth — `natural earth` projection
+for the world map, `albers usa` for the US map. Map type is selected via
+`?map=world` (default) or `?map=usa`; adding a third map type means appending
+an entry to the `COUNTRIES` / `STATES`-style dicts at the top of `mapof.py`.
 
 ## How it works
 
@@ -45,8 +44,8 @@ so it has no Postgres dependency and ships the DB as a single file.
 
 ## Files
 
-- `mapof.py` — Django view; the `MapOf.fill_dict` method drives both maps.
-- `mapof.html` — Plotly choropleth template; transparent background.
+- `mapof.py` — scoring code; `MAPS`, `COUNTRIES`, `STATES` config dicts up top.
+- `mapof.html` — Plotly choropleth template (transparent background).
 - `build_db.py` — produces `static/word2vec.db` from Google News word2vec.
-- `requirements.txt` — minimal deps for the standalone build / run.
+- `requirements.txt` — minimal deps for the build and the scoring code.
 - `static/word2vec.db` — generated, not tracked in git.
