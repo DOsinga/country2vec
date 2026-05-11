@@ -322,7 +322,15 @@ class MapOf(Project):
         return self.SCORES[map_id]
 
     def _score_against(self, word, item_scores, key_to_output, backfill):
-        """Returns {output_code: normalized_score} for the given word."""
+        """Returns {output_code: rank-normalized score in [0, 1]}.
+
+        We use rank normalization (closest region -> 1.0, farthest -> 0.0,
+        linearly spaced in between) rather than min-max-scaling the raw
+        cosine distances. Cosine distance from a word to a region name is
+        usually bunched in the middle of [0, 2], so min-max gives most of
+        the map a near-identical dark color; ranking spreads the colors
+        evenly across the gradient.
+        """
         word_vec = _vec_for_lower(_conn(), word)
         if word_vec is None:
             return {}
@@ -335,11 +343,12 @@ class MapOf(Project):
                 raw[to_code] = raw[from_code]
         if not raw:
             return raw
-        mx = max(raw.values())
-        mn = min(raw.values())
-        if mx == mn:
-            return {k: 0.5 for k in raw}
-        return {k: 1 - (v - mn) / (mx - mn) for k, v in raw.items()}
+        n = len(raw)
+        if n == 1:
+            return {next(iter(raw)): 1.0}
+        # Smallest distance -> rank 0 -> score 1.0
+        ordered = sorted(raw, key=raw.get)
+        return {code: 1 - i / (n - 1) for i, code in enumerate(ordered)}
 
     def fill_dict(self, request, d):
         map_id = request.GET.get('map', 'world')
