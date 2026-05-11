@@ -50,7 +50,16 @@ redirects:
     colorscale: 'RdYlBu',
     reversescale: true,
     zmin: 0, zmax: 1,
-    showscale: false,
+    showscale: true,
+    colorbar: {
+      title: {text: 'similarity', side: 'right'},
+      thickness: 12,
+      len: 0.7,
+      tickvals: [0, 0.5, 1],
+      ticktext: ['low', 'mid', 'high'],
+      outlinewidth: 0,
+      bgcolor: 'rgba(0,0,0,0)',
+    },
     hovertemplate: '<b>%{text}</b><br>score: %{z:.2f}<extra></extra>',
     marker: {line: {color: '#888', width: 0.4}}
   }], {
