@@ -6,9 +6,8 @@ import apsw
 import numpy as np
 import scipy.spatial.distance
 import sqlite_vec
-from django.http import HttpResponse
 
-from projects.common import Project
+from projects.common import HttpResponse, Project
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "static", "word2vec.db")
 
